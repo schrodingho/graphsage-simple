@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-
 import random
 
 """
@@ -12,7 +11,7 @@ class MeanAggregator(nn.Module):
     """
     Aggregates a node's embeddings using mean of neighbors' embeddings
     """
-    def __init__(self, features, cuda=False, gcn=False): 
+    def __init__(self, features, cuda=False, gcn=False):
         """
         Initializes the aggregator for a specific graph.
 
@@ -45,7 +44,7 @@ class MeanAggregator(nn.Module):
 
         if self.gcn:
             samp_neighs = [samp_neigh + set([nodes[i]]) for i, samp_neigh in enumerate(samp_neighs)]
-        unique_nodes_list = list(set.union(*samp_neighs))
+        unique_nodes_list = list(set.union(*samp_neighs))# *列表解压缩
         unique_nodes = {n:i for i,n in enumerate(unique_nodes_list)}
         mask = Variable(torch.zeros(len(samp_neighs), len(unique_nodes)))
         column_indices = [unique_nodes[n] for samp_neigh in samp_neighs for n in samp_neigh]   
@@ -53,8 +52,9 @@ class MeanAggregator(nn.Module):
         mask[row_indices, column_indices] = 1
         if self.cuda:
             mask = mask.cuda()
+        # 每一行的所有值加起来
         num_neigh = mask.sum(1, keepdim=True)
-        mask = mask.div(num_neigh)
+        mask = mask.div(num_neigh)#div除法 mean agg
         if self.cuda:
             embed_matrix = self.features(torch.LongTensor(unique_nodes_list).cuda())
         else:

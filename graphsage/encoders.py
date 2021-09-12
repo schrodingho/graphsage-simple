@@ -36,6 +36,8 @@ class Encoder(nn.Module):
 
         nodes     -- list of nodes
         """
+        # nodes: input node
+        # adj_lists[int(node)]提取邻居
         neigh_feats = self.aggregator.forward(nodes, [self.adj_lists[int(node)] for node in nodes], 
                 self.num_sample)
         if not self.gcn:
